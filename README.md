@@ -19,3 +19,6 @@
 | **RF13** | O sistema deve reiniciar a fase caso o personagem não chegue ao objetivo final | Importante |
 | **RF14** | O sistema deve avançar de fase caso o personagem chegue ao objetivo final | Desejável |
 | **RF15** | O sistema deve persistir a fase que o jogador se encontra | Importante |
+
+# Arquitetura em alto nível do sistema
+<img width="992" height="396" alt="arquitetura-alto-nivel" src="https://github.com/user-attachments/assets/785b1d7d-be34-45ef-a3f6-f5f69e0d1cb6" />
