@@ -112,23 +112,32 @@ As tecnologias serão definidas e validadas com o professor antes do início da 
 
 ## 6. Estratégia de Testes Automatizados
 
-Os testes automatizados serão desenvolvidos juntamente com as funcionalidades implementadas.
+Com a definição da arquitetura dividindo o sistema entre um App/Frontend com API Backend e o Motor de Jogo (GameMaker)[cite: 6], a automação de testes será separada em duas frentes tecnológicas. Essa abordagem garante a métrica de cobertura exigida pelo projeto sem esbarrar nas conhecidas limitações e instabilidades de realizar testes visuais diretamente na renderização do jogo.
 
-Inicialmente, pretende-se testar principalmente:
+### 6.1. Ecossistema Web e Backend (API)
+Foco na lógica de negócios externa, persistência de dados e autenticação de usuários.
 
-- inserção de comandos na sequência;
-- remoção e limpeza da sequência;
-- execução dos comandos;
-- movimentação do personagem;
-- limites do tabuleiro;
-- colisão com obstáculos;
-- condições de vitória e derrota;
-- avanço e reinício das fases;
-- persistência da fase do usuário;
-- funcionalidades de autenticação, quando aplicável.
+* **Testes de Unidade e Integração (Backend):**
+  * **Autenticação:** Utilização de mocks para simular o retorno do provedor OAuth 2.0 (Google), garantindo que a sessão/token valide corretamente o acesso do usuário[cite: 6].
+  * **Serviço de Progresso:** Validação das rotas que gravam e leem o estado atual no Banco de Dados, como a fase do jogador e as sequências de comandos executadas[cite: 6].
+  * **Tecnologias sugeridas:** Jest com Supertest (para stack Node.js) ou JUnit com Mockito (para stack Java Spring).
 
-A ferramenta utilizada para os testes será definida de acordo com as tecnologias escolhidas para o projeto.
+* **Testes End-to-End (E2E / Frontend):**
+  * **Fluxo Crítico:** Validação pontual do caminho feliz: acessar a aplicação, realizar o login com Google e ser redirecionado para o carregamento do conteúdo no motor de jogo[cite: 6].
+  * **Tecnologias sugeridas:** Playwright ou Cypress.
 
+### 6.2. Lógica do Jogo (GameMaker)
+Automatizar testes dentro da *engine* exige o princípio de "Lógica Desacoplada", separando as regras matemáticas e de estado da renderização gráfica (eventos de *Draw*).
+
+* **Testes de Unidade (Scripts GML):**
+  * **Fila de Comandos:** Testar diretamente os métodos da classe `Sequência de Comandos` para garantir que `adicionarComando()`, `removerComando()` e a limpeza do array `listaDireção` funcionem sob qualquer condição[cite: 5].
+  * **Movimentação e Limites:** Chamar os métodos de movimentação e verificar se as coordenadas do `Personagem` são atualizadas e se ultrapassar a `matrizTabuleiro` gera um bloqueio imediato[cite: 5].
+  * **Vitória e Colisão:** Injetar coordenadas simuladas para testar de forma isolada os retornos lógicos de `verificarVitória()`[cite: 5] e das colisões com os `obstáculos`[cite: 5].
+* **Tecnologias sugeridas:** Criação de scripts de asserção customizados (ex: `assert_equal(esperado, resultado)`) executados de forma oculta (*headless*) com logs no console de *Output*, ou uso de frameworks da comunidade (como o GMRT - GameMaker Robo Tester).
+
+### 6.3. Integração Contínua (CI) e Métrica de Cobertura
+* **Pipeline Automatizado:** Criação de *workflows* no **GitHub Actions** para rodar automaticamente os testes da API a cada *Pull Request* e *Push* nas *branches* principais.
+* **Cobertura e Artefatos:** Configuração de relatórios de cobertura (ex: *Istanbul*/*JaCoCo*) no backend visando a meta do projeto ($\ge 80\%$ nas regras centrais), atuando como *Quality Gate* para bloquear *merges* que quebrem as funcionalidades existentes.
 ---
 
 # 🗓️ Cronograma
