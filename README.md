@@ -112,27 +112,27 @@ As tecnologias serão definidas e validadas com o professor antes do início da 
 
 ## 6. Estratégia de Testes Automatizados
 
-Com a definição da arquitetura dividindo o sistema entre um App/Frontend com API Backend e o Motor de Jogo (GameMaker)[cite: 6], a automação de testes será separada em duas frentes tecnológicas. Essa abordagem garante a métrica de cobertura exigida pelo projeto sem esbarrar nas conhecidas limitações e instabilidades de realizar testes visuais diretamente na renderização do jogo.
+Com a definição da arquitetura dividindo o sistema entre um App/Frontend com API Backend e o Motor de Jogo (GameMaker), a automação de testes será separada em duas frentes tecnológicas. Essa abordagem garante a métrica de cobertura exigida pelo projeto sem esbarrar nas conhecidas limitações e instabilidades de realizar testes visuais diretamente na renderização do jogo.
 
 ### 6.1. Ecossistema Web e Backend (API)
 Foco na lógica de negócios externa, persistência de dados e autenticação de usuários.
 
 * **Testes de Unidade e Integração (Backend):**
-  * **Autenticação:** Utilização de mocks para simular o retorno do provedor OAuth 2.0 (Google), garantindo que a sessão/token valide corretamente o acesso do usuário[cite: 6].
-  * **Serviço de Progresso:** Validação das rotas que gravam e leem o estado atual no Banco de Dados, como a fase do jogador e as sequências de comandos executadas[cite: 6].
+  * **Autenticação:** Utilização de mocks para simular o retorno do provedor OAuth 2.0 (Google), garantindo que a sessão/token valide corretamente o acesso do usuário.
+  * **Serviço de Progresso:** Validação das rotas que gravam e leem o estado atual no Banco de Dados, como a fase do jogador e as sequências de comandos executadas.
   * **Tecnologias sugeridas:** Jest com Supertest (para stack Node.js) ou JUnit com Mockito (para stack Java Spring).
 
 * **Testes End-to-End (E2E / Frontend):**
-  * **Fluxo Crítico:** Validação pontual do caminho feliz: acessar a aplicação, realizar o login com Google e ser redirecionado para o carregamento do conteúdo no motor de jogo[cite: 6].
+  * **Fluxo Crítico:** Validação pontual do caminho feliz: acessar a aplicação, realizar o login com Google e ser redirecionado para o carregamento do conteúdo no motor de jogo.
   * **Tecnologias sugeridas:** Playwright ou Cypress.
 
 ### 6.2. Lógica do Jogo (GameMaker)
 Automatizar testes dentro da *engine* exige o princípio de "Lógica Desacoplada", separando as regras matemáticas e de estado da renderização gráfica (eventos de *Draw*).
 
 * **Testes de Unidade (Scripts GML):**
-  * **Fila de Comandos:** Testar diretamente os métodos da classe `Sequência de Comandos` para garantir que `adicionarComando()`, `removerComando()` e a limpeza do array `listaDireção` funcionem sob qualquer condição[cite: 5].
-  * **Movimentação e Limites:** Chamar os métodos de movimentação e verificar se as coordenadas do `Personagem` são atualizadas e se ultrapassar a `matrizTabuleiro` gera um bloqueio imediato[cite: 5].
-  * **Vitória e Colisão:** Injetar coordenadas simuladas para testar de forma isolada os retornos lógicos de `verificarVitória()`[cite: 5] e das colisões com os `obstáculos`[cite: 5].
+  * **Fila de Comandos:** Testar diretamente os métodos da classe `Sequência de Comandos` para garantir que `adicionarComando()`, `removerComando()` e a limpeza do array `listaDireção` funcionem sob qualquer condição.
+  * **Movimentação e Limites:** Chamar os métodos de movimentação e verificar se as coordenadas do `Personagem` são atualizadas e se ultrapassar a `matrizTabuleiro` gera um bloqueio imediato.
+  * **Vitória e Colisão:** Injetar coordenadas simuladas para testar de forma isolada os retornos lógicos de `verificarVitória()` e das colisões com os `obstáculos`.
 * **Tecnologias sugeridas:** Criação de scripts de asserção customizados (ex: `assert_equal(esperado, resultado)`) executados de forma oculta (*headless*) com logs no console de *Output*, ou uso de frameworks da comunidade (como o GMRT - GameMaker Robo Tester).
 
 ### 6.3. Integração Contínua (CI) e Métrica de Cobertura
