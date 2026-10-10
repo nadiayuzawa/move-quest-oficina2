@@ -21,6 +21,8 @@
   "resources":[
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
     {"id":{"name":"spr_player","path":"sprites/spr_player/spr_player.yy",},},
+    {"id":{"name":"spr_tileSet","path":"sprites/spr_tileSet/spr_tileSet.yy",},},
+    {"id":{"name":"t_ground","path":"tilesets/t_ground/t_ground.yy",},},
   ],
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
