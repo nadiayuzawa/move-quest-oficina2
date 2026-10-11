@@ -21,7 +21,10 @@
   "resources":[
     {"id":{"name":"obj_player","path":"objects/obj_player/obj_player.yy",},},
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"id":{"name":"spr_chegada","path":"sprites/spr_chegada/spr_chegada.yy",},},
     {"id":{"name":"spr_ghost","path":"sprites/spr_ghost/spr_ghost.yy",},},
+    {"id":{"name":"spr_paredeX","path":"sprites/spr_paredeX/spr_paredeX.yy",},},
+    {"id":{"name":"spr_paredeY","path":"sprites/spr_paredeY/spr_paredeY.yy",},},
     {"id":{"name":"spr_player","path":"sprites/spr_player/spr_player.yy",},},
     {"id":{"name":"spr_playerDead","path":"sprites/spr_playerDead/spr_playerDead.yy",},},
     {"id":{"name":"spr_prize","path":"sprites/spr_prize/spr_prize.yy",},},
