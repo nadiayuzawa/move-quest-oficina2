@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_fases",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_fases",
+  "parent":{
+    "name":"moveQuestOficina",
+    "path":"moveQuestOficina.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
