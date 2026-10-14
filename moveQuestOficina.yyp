@@ -30,6 +30,7 @@
     {"id":{"name":"obj_button_up","path":"objects/obj_button_up/obj_button_up.yy",},},
     {"id":{"name":"obj_game","path":"objects/obj_game/obj_game.yy",},},
     {"id":{"name":"obj_grade","path":"objects/obj_grade/obj_grade.yy",},},
+    {"id":{"name":"obj_hud","path":"objects/obj_hud/obj_hud.yy",},},
     {"id":{"name":"obj_menu","path":"objects/obj_menu/obj_menu.yy",},},
     {"id":{"name":"obj_objetivo","path":"objects/obj_objetivo/obj_objetivo.yy",},},
     {"id":{"name":"obj_player","path":"objects/obj_player/obj_player.yy",},},
