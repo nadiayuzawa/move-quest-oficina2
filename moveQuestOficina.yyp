@@ -33,7 +33,10 @@
     {"id":{"name":"obj_hud","path":"objects/obj_hud/obj_hud.yy",},},
     {"id":{"name":"obj_menu","path":"objects/obj_menu/obj_menu.yy",},},
     {"id":{"name":"obj_objetivo","path":"objects/obj_objetivo/obj_objetivo.yy",},},
+    {"id":{"name":"obj_obstaculo","path":"objects/obj_obstaculo/obj_obstaculo.yy",},},
     {"id":{"name":"obj_player","path":"objects/obj_player/obj_player.yy",},},
+    {"id":{"name":"rm_fase2","path":"rooms/rm_fase2/rm_fase2.yy",},},
+    {"id":{"name":"rm_fase3","path":"rooms/rm_fase3/rm_fase3.yy",},},
     {"id":{"name":"rm_menu","path":"rooms/rm_menu/rm_menu.yy",},},
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
     {"id":{"name":"scr_fases","path":"scripts/scr_fases/scr_fases.yy",},},
@@ -58,6 +61,8 @@
   "RoomOrderNodes":[
     {"roomId":{"name":"rm_menu","path":"rooms/rm_menu/rm_menu.yy",},},
     {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"roomId":{"name":"rm_fase2","path":"rooms/rm_fase2/rm_fase2.yy",},},
+    {"roomId":{"name":"rm_fase3","path":"rooms/rm_fase3/rm_fase3.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

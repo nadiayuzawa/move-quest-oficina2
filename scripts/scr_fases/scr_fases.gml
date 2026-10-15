@@ -1,6 +1,6 @@
 // T26 - Controle das fases
 // Salas de cada fase, em ordem. Ao criar a Fase 2 e a Fase 3, é só adicionar aqui.
-global.salas_fases = [Room1];
+global.salas_fases = [Room1, rm_fase2, rm_fase3];
 global.fase = 1;
 
 /// Vai para a fase _n (1 = primeira fase)
