@@ -3,52 +3,44 @@ if (obj_game.playing && !moving)
     if (obj_game.command_index < array_length(obj_game.commands))
     {
         var command = obj_game.commands[obj_game.command_index];
+        var passo = global.celula;
 
         if (command == "right")
         {
-            target_x = x + 32;
+            target_x = x + passo;
             target_y = y;
         }
-        
+
         if (command == "left")
         {
-            target_x = x - 32;
+            target_x = x - passo;
             target_y = y;
         }
-        
+
         if (command == "up")
         {
             target_x = x;
-            target_y = y - 32;
+            target_y = y - passo;
         }
-        
+
         if (command == "down")
         {
             target_x = x;
-            target_y = y + 32;
+            target_y = y + passo;
         }
-		
-		var half_w = sprite_width / 2;
-		var half_h = sprite_height / 2;
 
-		target_x = clamp(
-		    target_x,
-		    scene_left + scene_margin + half_w,
-		    scene_right - scene_margin - half_w
-		);
-
-		target_y = clamp(
-		    target_y,
-		    scene_top + scene_margin + half_h,
-		    scene_bottom - scene_margin - half_h
-		);
+        // Mantém o personagem dentro da malha (primeira e última célula)
+        target_x = clamp(target_x, celula_x(0), celula_x(global.grade_cols - 1));
+        target_y = clamp(target_y, celula_y(0), celula_y(global.grade_lins - 1));
 
         moving = true;
-    }else{
-		obj_game.playing = false;
-	    obj_game.commands = [];
-	    obj_game.command_index = 0;
-	}
+    }
+    else
+    {
+        obj_game.playing = false;
+        obj_game.commands = [];
+        obj_game.command_index = 0;
+    }
 }
 
 if (moving)

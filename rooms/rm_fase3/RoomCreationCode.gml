@@ -1,21 +1,15 @@
-// Fase 3 - armadilha em U (x, y, sprite)
-var obstaculos = [
-    // parede em pé à esquerda
-    [480, 224, spr_paredeY], [480, 256, spr_paredeY], [480, 288, spr_paredeY],
-    [480, 320, spr_paredeY], [480, 352, spr_paredeY], [480, 384, spr_paredeY],
-    // teto do U
-    [544, 256, spr_paredeX], [576, 256, spr_paredeX], [608, 256, spr_paredeX],
-    [640, 256, spr_paredeX], [672, 256, spr_paredeX],
-    // laterais do U
-    [544, 288, spr_paredeY], [544, 320, spr_paredeY], [544, 352, spr_paredeY],
-    [672, 288, spr_paredeY], [672, 320, spr_paredeY], [672, 352, spr_paredeY],
-    // fantasmas
-    [576, 320, spr_ghost], [608, 384, spr_ghost],
-    [512, 416, spr_ghost], [640, 448, spr_ghost]
-];
+// Fase 3 - armadilha em U (10 comandos, solução única)
+posicionar_fase(0, 1, 5, 2);
 
-for (var i = 0; i < array_length(obstaculos); i++)
-{
-    var ob = instance_create_layer(obstaculos[i][0], obstaculos[i][1], "Instances", obj_obstaculo);
-    ob.sprite_index = obstaculos[i][2];
-}
+criar_obstaculos([
+    // teto do U
+    [3, 1, spr_paredeX], [4, 1, spr_paredeX], [5, 1, spr_paredeX],
+    [6, 1, spr_paredeX], [7, 1, spr_paredeX],
+    // laterais do U
+    [3, 2, spr_paredeY], [3, 3, spr_paredeY],
+    [7, 2, spr_paredeY], [7, 3, spr_paredeY],
+    // parede da esquerda
+    [1, 2, spr_paredeY], [1, 3, spr_paredeY], [1, 4, spr_paredeY],
+    // fantasmas
+    [4, 2, spr_ghost], [5, 4, spr_ghost], [2, 5, spr_ghost], [7, 5, spr_ghost]
+]);

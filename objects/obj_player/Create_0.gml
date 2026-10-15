@@ -11,3 +11,9 @@ scene_top    = 80;
 scene_bottom = 570;
 
 scene_margin = 32;
+
+
+// Zoom: tamanho e velocidade acompanham a célula
+image_xscale = global.celula / 32;
+image_yscale = global.celula / 32;
+move_speed   = global.celula / 8;
