@@ -37,6 +37,11 @@ function criar_obstaculos(_lista)
     {
         var ob = instance_create_layer(celula_x(_lista[i][0]), celula_y(_lista[i][1]), "Instances", obj_obstaculo);
         ob.sprite_index = _lista[i][2];
+        
+        // SOLUÇÃO DA PAREDE INVISÍVEL:
+        // Força a colisão física a ficar restrita estritamente dentro da célula atual,
+        // impedindo que as paredes compridas invadam e bloqueiem o corredor de passagem!
+        ob.mask_index = spr_ghost;
     }
 }
 
