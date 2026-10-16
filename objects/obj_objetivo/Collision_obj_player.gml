@@ -1,2 +1,3 @@
-instance_destroy()
 avancar_fase();
+instance_destroy();
+
