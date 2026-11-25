@@ -17,3 +17,5 @@ scene_margin = 32;
 image_xscale = global.celula / 32;
 image_yscale = global.celula / 32;
 move_speed   = global.celula / 8;
+// T21 - true enquanto o passo atual sai da malha
+saindo = false;

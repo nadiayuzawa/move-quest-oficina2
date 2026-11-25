@@ -71,3 +71,64 @@ function avancar_fase()
         room_goto(rm_menu);
     }
 }
+
+
+// ---------- Sequência de comandos (T15) ----------
+
+/// A sequência só pode ser alterada antes do Play e com a fase em andamento
+function sequencia_editavel()
+{
+    return instance_exists(obj_game) && !obj_game.playing && obj_game.resultado == "";
+}
+
+/// Adiciona um comando ("up", "down", "left", "right") ao fim da sequência
+function adicionar_comando(_cmd)
+{
+    if (!sequencia_editavel()) return false;
+    if (array_length(obj_game.commands) >= obj_game.max_commands) return false;
+
+    array_push(obj_game.commands, _cmd);
+    return true;
+}
+
+/// Remove o comando na posição _i (0 = primeiro)
+function remover_comando(_i)
+{
+    if (!sequencia_editavel()) return false;
+    if (_i < 0 || _i >= array_length(obj_game.commands)) return false;
+
+    array_delete(obj_game.commands, _i, 1);
+    return true;
+}
+
+/// Apaga toda a sequência
+function limpar_comandos()
+{
+    if (!sequencia_editavel()) return false;
+
+    obj_game.commands = [];
+    return true;
+}
+
+
+// ---------- Vitória e derrota (T20 / T21) ----------
+
+/// Encerra a fase. _resultado = "vitoria" ou "derrota".
+/// Mostra a mensagem por alguns segundos e depois avança (vitória)
+/// ou reinicia a fase (derrota). Chamadas repetidas são ignoradas.
+function terminar_fase(_resultado, _motivo)
+{
+    if (!instance_exists(obj_game) || obj_game.resultado != "") return;
+
+    obj_game.resultado = _resultado;
+    obj_game.mensagem  = _motivo;
+    obj_game.playing   = false;
+    obj_game.timer_resultado = game_get_speed(gamespeed_fps) * 2;
+
+    if (_resultado == "derrota" && instance_exists(obj_player))
+    {
+        obj_player.moving = false;
+        obj_player.sprite_index = spr_playerDead;
+        obj_player.image_index = 0;
+    }
+}

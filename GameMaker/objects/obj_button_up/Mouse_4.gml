@@ -1,9 +1,5 @@
 if (!click_lock)
 {
-    with (obj_game)
-    {
-        array_push(commands, "up");
-    }
-
+    adicionar_comando("up");
     click_lock = true;
 }
