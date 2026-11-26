@@ -3,11 +3,12 @@ import os
 import uuid
 import json
 from datetime import datetime, timedelta, timezone
+from uuid import UUID
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from supabase import create_client, Client
 
 # =====================================================
@@ -26,6 +27,9 @@ BACKEND_URL = os.getenv(
 ).rstrip("/")
 
 FLOW_EXPIRATION_MINUTES = 10
+
+# Quantidade de fases do jogo (deve acompanhar global.salas_fases no GameMaker).
+TOTAL_LEVELS = int(os.getenv("TOTAL_LEVELS", "3"))
 
 # =====================================================
 # CLIENTES SUPABASE
@@ -65,6 +69,11 @@ login_flows = {}
 class CompleteLogin(BaseModel):
     flow_id: str
     access_token: str
+
+
+class CompleteLevel(BaseModel):
+    player_id: UUID
+    level: int = Field(ge=1)
 
 
 # =====================================================
@@ -508,6 +517,175 @@ def login_status(flow_id: str):
         "status": flow["status"],
         "player": flow["player"]
     }
+
+
+# =====================================================
+# PROGRESSO DO JOGADOR (T37 / T38 / T41 / T42)
+# =====================================================
+#
+# Tabelas (ver Backend/sql/progress.sql):
+#   player_progress -> last_level por jogador
+#   level_progress  -> status de conclusão de cada fase
+
+def next_last_level(current: int, completed_level: int) -> int:
+    """Fase em que o jogador deve continuar após concluir uma fase.
+
+    Nunca regride (rejogar a fase 1 não volta o jogador da fase 3)
+    e nunca passa do total de fases.
+    """
+
+    return max(
+        current,
+        min(completed_level + 1, TOTAL_LEVELS)
+    )
+
+
+def load_progress(player_id: str) -> dict:
+    """Lê o progresso do jogador. Sem registro = início do jogo."""
+
+    progress = (
+        admin_client.table("player_progress")
+        .select("last_level")
+        .eq("player_id", player_id)
+        .limit(1)
+        .execute()
+    )
+
+    levels = (
+        admin_client.table("level_progress")
+        .select("level")
+        .eq("player_id", player_id)
+        .eq("completed", True)
+        .execute()
+    )
+
+    last_level = (
+        progress.data[0]["last_level"]
+        if progress.data
+        else 1
+    )
+
+    completed_levels = sorted(
+        row["level"] for row in (levels.data or [])
+    )
+
+    return {
+        "player_id": player_id,
+        "last_level": last_level,
+        "completed_levels": completed_levels,
+        "total_levels": TOTAL_LEVELS,
+        "all_completed": len(completed_levels) >= TOTAL_LEVELS
+    }
+
+
+def ensure_player_exists(player_id: str):
+
+    result = (
+        admin_client.table("players")
+        .select("id")
+        .eq("id", player_id)
+        .limit(1)
+        .execute()
+    )
+
+    if not result.data:
+        raise HTTPException(
+            404,
+            "Jogador não encontrado."
+        )
+
+
+@app.get("/progress/{player_id}")
+def get_progress(player_id: UUID):
+    """T41 - Recupera a última fase e as fases concluídas."""
+
+    player_id = str(player_id)
+
+    ensure_player_exists(player_id)
+
+    try:
+        return load_progress(player_id)
+
+    except Exception as error:
+
+        print("Erro ao consultar progresso:", str(error))
+
+        raise HTTPException(
+            500,
+            "Não foi possível consultar o progresso."
+        )
+
+
+@app.post("/progress/complete")
+def complete_level(data: CompleteLevel):
+    """T42 - Registra a conclusão de uma fase e salva o progresso."""
+
+    if data.level > TOTAL_LEVELS:
+
+        raise HTTPException(
+            400,
+            f"Fase inválida. O jogo possui {TOTAL_LEVELS} fases."
+        )
+
+    player_id = str(data.player_id)
+
+    ensure_player_exists(player_id)
+
+    try:
+
+        now = datetime.now(timezone.utc).isoformat()
+
+        # T38 - Marca a fase como concluída.
+        # ignore_duplicates mantém a data da primeira conclusão
+        # caso o jogador repita a fase.
+        admin_client.table("level_progress").upsert(
+            {
+                "player_id": player_id,
+                "level": data.level,
+                "completed": True,
+                "completed_at": now
+            },
+            on_conflict="player_id,level",
+            ignore_duplicates=True
+        ).execute()
+
+        # T37 - Atualiza a fase em que o jogador deve continuar.
+        current = (
+            admin_client.table("player_progress")
+            .select("last_level")
+            .eq("player_id", player_id)
+            .limit(1)
+            .execute()
+        )
+
+        current_level = (
+            current.data[0]["last_level"]
+            if current.data
+            else 1
+        )
+
+        admin_client.table("player_progress").upsert(
+            {
+                "player_id": player_id,
+                "last_level": next_last_level(
+                    current_level,
+                    data.level
+                ),
+                "updated_at": now
+            },
+            on_conflict="player_id"
+        ).execute()
+
+        return load_progress(player_id)
+
+    except Exception as error:
+
+        print("Erro ao salvar progresso:", str(error))
+
+        raise HTTPException(
+            500,
+            "Não foi possível salvar o progresso."
+        )
 
 
 # =====================================================

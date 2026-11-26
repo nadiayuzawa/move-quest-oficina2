@@ -62,6 +62,10 @@ if (request_id == request_status) {
 
             login_message = "Login realizado com sucesso!";
 
+            // T41 - Busca a última fase e as fases concluídas do jogador
+            progresso_resetar();
+            progresso_carregar();
+
             show_debug_message(
                 "Jogador autenticado: " + player_name
             );
