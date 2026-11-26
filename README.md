@@ -168,6 +168,27 @@ http://127.0.0.1:8000/docs
 
 A documentação interativa do FastAPI permite consultar os endpoints disponibilizados pelo backend.
 
+### 5.8 Criar as tabelas de progresso
+
+O progresso do jogador (última fase e fases concluídas) fica no Supabase. Uma única vez:
+
+1. Abra o Supabase → **SQL Editor** → **New query**.
+2. Cole o conteúdo de `Backend/sql/progress.sql` e clique em **Run**.
+
+| Tabela | Conteúdo |
+|---|---|
+| `player_progress` | Última fase (`last_level`) de cada jogador |
+| `level_progress` | Status de conclusão de cada fase por jogador |
+
+Endpoints (visíveis em `/docs`):
+
+| Método | Rota | Função |
+|---|---|---|
+| GET | `/progress/{player_id}` | Retorna `last_level` e `completed_levels` |
+| POST | `/progress/complete` | Registra a fase concluída (`player_id`, `level`) e atualiza `last_level` |
+
+Se o jogo tiver mais ou menos de 3 fases, ajuste `TOTAL_LEVELS` no `.env`.
+
 ## 6. Executar o jogo no GameMaker
 
 Com o backend em execução:
