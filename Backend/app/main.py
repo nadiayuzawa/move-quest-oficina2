@@ -4,18 +4,32 @@ import uuid
 import json
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from supabase import create_client, Client
+
+
 
 # =====================================================
 # CONFIGURAÇÕES
 # =====================================================
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = BASE_DIR.parent
+
+TEMPLATES_DIR = BASE_DIR / "templates"
+STATIC_DIR = BASE_DIR / "static"
+
+print("BASE_DIR:", BASE_DIR)
+print("STATIC_DIR:", STATIC_DIR)
+print("CSS EXISTE:", (STATIC_DIR / "css" / "style.css").exists())
+
+load_dotenv(dotenv_path=BACKEND_DIR / ".env")
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_KEY"]
@@ -27,9 +41,28 @@ BACKEND_URL = os.getenv(
 ).rstrip("/")
 
 FLOW_EXPIRATION_MINUTES = 10
-
-# Quantidade de fases do jogo (deve acompanhar global.salas_fases no GameMaker).
 TOTAL_LEVELS = int(os.getenv("TOTAL_LEVELS", "3"))
+
+# Verificar se as pastas existem
+if not TEMPLATES_DIR.is_dir():
+    raise RuntimeError(
+        f"Pasta templates não encontrada: {TEMPLATES_DIR}"
+    )
+
+if not STATIC_DIR.is_dir():
+    raise RuntimeError(
+        f"Pasta static não encontrada: {STATIC_DIR}"
+    )
+
+
+
+# =====================================================
+# CAMINHO DOS ARQUIVOS HTML
+# =====================================================
+
+BASE_DIR = Path(__file__).resolve().parent
+TEMPLATES_DIR = BASE_DIR / "templates"
+
 
 # =====================================================
 # CLIENTES SUPABASE
@@ -47,14 +80,21 @@ admin_client: Client = create_client(
     SERVICE_KEY
 )
 
+
 # =====================================================
 # FASTAPI
 # =====================================================
 
 app = FastAPI(
-    title="Game Authentication API",
+    title="Move Quest Backend API",
     description="Autenticação Google com Supabase",
     version="1.0.0"
+)
+
+app.mount(
+    "/static",
+    StaticFiles(directory=str(STATIC_DIR)),
+    name="static"
 )
 
 # Protótipo local.
@@ -91,6 +131,7 @@ def get_valid_flow(flow_id: str):
         )
 
     if datetime.now(timezone.utc) > flow["expires_at"]:
+
         login_flows.pop(flow_id, None)
 
         raise HTTPException(
@@ -101,6 +142,23 @@ def get_valid_flow(flow_id: str):
     return flow
 
 
+def read_html_file(filename: str) -> str:
+    """
+    Lê um arquivo HTML localizado na pasta templates.
+    """
+
+    html_path = TEMPLATES_DIR / filename
+
+    if not html_path.exists():
+
+        raise HTTPException(
+            500,
+            f"Arquivo {filename} não encontrado."
+        )
+
+    return html_path.read_text(encoding="utf-8")
+
+
 # =====================================================
 # PÁGINA INICIAL
 # =====================================================
@@ -108,26 +166,11 @@ def get_valid_flow(flow_id: str):
 @app.get("/", response_class=HTMLResponse)
 def home():
 
-    return """
-    <!DOCTYPE html>
-    <html lang="pt-br">
+    html = read_html_file("home.html")
 
-    <head>
-        <meta charset="UTF-8">
-        <title>Servidor de Login</title>
-    </head>
-
-    <body>
-
-        <h1>Servidor de Login Online!</h1>
-
-        <p>Backend funcionando corretamente.</p>
-
-        <a href="/docs">Acessar API</a>
-
-    </body>
-    </html>
-    """
+    return HTMLResponse(
+        content=html
+    )
 
 
 # =====================================================
@@ -166,186 +209,29 @@ def login_page(flow_id: str):
 
     get_valid_flow(flow_id)
 
-    # Valores seguros para inserir no JavaScript.
-    supabase_url_js = json.dumps(SUPABASE_URL)
-    supabase_key_js = json.dumps(SUPABASE_KEY)
-    flow_id_js = json.dumps(flow_id)
-    backend_url_js = json.dumps(BACKEND_URL)
+    html = read_html_file("login.html")
 
-    callback_js = json.dumps(
-        f"{BACKEND_URL}/auth/callback"
+    # Serializa os valores para inserção segura no JavaScript.
+    replacements = {
+        "__SUPABASE_URL__": json.dumps(SUPABASE_URL),
+        "__SUPABASE_KEY__": json.dumps(SUPABASE_KEY),
+        "__FLOW_ID__": json.dumps(flow_id),
+        "__BACKEND_URL__": json.dumps(BACKEND_URL),
+        "__CALLBACK__": json.dumps(
+            f"{BACKEND_URL}/auth/callback"
+        )
+    }
+
+    for placeholder, value in replacements.items():
+
+        html = html.replace(
+            placeholder,
+            value
+        )
+
+    return HTMLResponse(
+        content=html
     )
-
-    html = f"""
-    <!DOCTYPE html>
-
-    <html lang="pt-br">
-
-    <head>
-
-        <meta charset="UTF-8">
-
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1">
-
-        <title>Login do Jogo</title>
-
-    </head>
-
-    <body>
-
-        <h2>Login com Google</h2>
-
-        <p id="status">
-            Conectando sua conta Google...
-        </p>
-
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-        <script>
-
-            const SUPABASE_URL = {supabase_url_js};
-            const SUPABASE_KEY = {supabase_key_js};
-            const FLOW_ID = {flow_id_js};
-            const BACKEND_URL = {backend_url_js};
-            const CALLBACK = {callback_js};
-
-            const client = window.supabase.createClient(
-                SUPABASE_URL,
-                SUPABASE_KEY,
-                {{
-                    auth: {{
-                        flowType: "pkce",
-                        detectSessionInUrl: false,
-                        persistSession: true
-                    }}
-                }}
-            );
-
-            async function run() {{
-
-                const statusElement =
-                    document.getElementById("status");
-
-                const params = new URLSearchParams(
-                    location.search
-                );
-
-                // Verifica erros retornados pelo OAuth.
-                const oauthError = params.get("error_description")
-                    || params.get("error");
-
-                if (oauthError) {{
-                    throw new Error(oauthError);
-                }}
-
-                const code = params.get("code");
-
-                // =====================================
-                // TROCAR CÓDIGO PELA SESSÃO
-                // =====================================
-
-                if (code) {{
-
-                    const {{ error }} =
-                        await client.auth.exchangeCodeForSession(
-                            code
-                        );
-
-                    if (error) throw error;
-
-                }} else {{
-
-                    // =================================
-                    // INICIAR LOGIN GOOGLE
-                    // =================================
-
-                    const {{ error }} =
-                        await client.auth.signInWithOAuth({{
-                            provider: "google",
-
-                            options: {{
-                                redirectTo:
-                                    CALLBACK +
-                                    "?flow_id=" +
-                                    encodeURIComponent(FLOW_ID)
-                            }}
-                        }});
-
-                    if (error) throw error;
-
-                    return;
-                }}
-
-                // =====================================
-                // RECUPERAR SESSÃO
-                // =====================================
-
-                const {{ data, error }} =
-                    await client.auth.getSession();
-
-                if (error) throw error;
-
-                if (!data.session) {{
-                    throw new Error(
-                        "Sessão não encontrada."
-                    );
-                }}
-
-                // =====================================
-                // ENVIAR TOKEN AO BACKEND
-                // =====================================
-
-                const response = await fetch(
-                    BACKEND_URL + "/auth/complete",
-                    {{
-                        method: "POST",
-
-                        headers: {{
-                            "Content-Type": "application/json"
-                        }},
-
-                        body: JSON.stringify({{
-                            flow_id: FLOW_ID,
-
-                            access_token:
-                                data.session.access_token
-                        }})
-                    }}
-                );
-
-                if (!response.ok) {{
-
-                    const result = await response.json();
-
-                    throw new Error(
-                        result.detail ||
-                        "Não foi possível concluir o login."
-                    );
-                }}
-
-                statusElement.innerText =
-                    "Login concluído! Você pode voltar ao jogo.";
-
-            }}
-
-            run().catch(error => {{
-
-                console.error(error);
-
-                document.getElementById("status").innerText =
-                    "Erro no login: " + error.message;
-
-            }});
-
-        </script>
-
-    </body>
-
-    </html>
-    """
-
-    return HTMLResponse(html)
 
 
 # =====================================================
@@ -527,8 +413,10 @@ def login_status(flow_id: str):
 #   player_progress -> last_level por jogador
 #   level_progress  -> status de conclusão de cada fase
 
+
 def next_last_level(current: int, completed_level: int) -> int:
-    """Fase em que o jogador deve continuar após concluir uma fase.
+    """
+    Fase em que o jogador deve continuar após concluir uma fase.
 
     Nunca regride (rejogar a fase 1 não volta o jogador da fase 3)
     e nunca passa do total de fases.
@@ -541,7 +429,10 @@ def next_last_level(current: int, completed_level: int) -> int:
 
 
 def load_progress(player_id: str) -> dict:
-    """Lê o progresso do jogador. Sem registro = início do jogo."""
+    """
+    Lê o progresso do jogador.
+    Sem registro = início do jogo.
+    """
 
     progress = (
         admin_client.table("player_progress")
@@ -589,26 +480,37 @@ def ensure_player_exists(player_id: str):
     )
 
     if not result.data:
+
         raise HTTPException(
             404,
             "Jogador não encontrado."
         )
 
 
+# =====================================================
+# CONSULTAR PROGRESSO
+# =====================================================
+
 @app.get("/progress/{player_id}")
 def get_progress(player_id: UUID):
-    """T41 - Recupera a última fase e as fases concluídas."""
+    """
+    T41 - Recupera a última fase e as fases concluídas.
+    """
 
     player_id = str(player_id)
 
     ensure_player_exists(player_id)
 
     try:
+
         return load_progress(player_id)
 
     except Exception as error:
 
-        print("Erro ao consultar progresso:", str(error))
+        print(
+            "Erro ao consultar progresso:",
+            str(error)
+        )
 
         raise HTTPException(
             500,
@@ -616,9 +518,15 @@ def get_progress(player_id: UUID):
         )
 
 
+# =====================================================
+# CONCLUIR FASE
+# =====================================================
+
 @app.post("/progress/complete")
 def complete_level(data: CompleteLevel):
-    """T42 - Registra a conclusão de uma fase e salva o progresso."""
+    """
+    T42 - Registra a conclusão de uma fase e salva o progresso.
+    """
 
     if data.level > TOTAL_LEVELS:
 
@@ -635,9 +543,13 @@ def complete_level(data: CompleteLevel):
 
         now = datetime.now(timezone.utc).isoformat()
 
-        # T38 - Marca a fase como concluída.
+        # =============================================
+        # T38 - MARCAR FASE COMO CONCLUÍDA
+        # =============================================
+
         # ignore_duplicates mantém a data da primeira conclusão
         # caso o jogador repita a fase.
+
         admin_client.table("level_progress").upsert(
             {
                 "player_id": player_id,
@@ -649,7 +561,10 @@ def complete_level(data: CompleteLevel):
             ignore_duplicates=True
         ).execute()
 
-        # T37 - Atualiza a fase em que o jogador deve continuar.
+        # =============================================
+        # T37 - ATUALIZAR ÚLTIMA FASE
+        # =============================================
+
         current = (
             admin_client.table("player_progress")
             .select("last_level")
@@ -680,7 +595,10 @@ def complete_level(data: CompleteLevel):
 
     except Exception as error:
 
-        print("Erro ao salvar progresso:", str(error))
+        print(
+            "Erro ao salvar progresso:",
+            str(error)
+        )
 
         raise HTTPException(
             500,
@@ -693,4 +611,4 @@ def complete_level(data: CompleteLevel):
 # =====================================================
 
 # Execute pelo terminal:
-# uvicorn main:app --reload
+# uvicorn main:app --reload --host 127.0.0.1 --port 8000
