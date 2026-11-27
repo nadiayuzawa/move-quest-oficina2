@@ -37,6 +37,30 @@ if (global.logged_in) {
         btn_y + btn_h / 2,
         (progresso_fase_inicial() > 1) ? "CONTINUAR" : "JOGAR"
     );
+	
+	// Botão SAIR
+	if (logout_hover) {
+	    draw_set_color(make_color_rgb(220, 90, 90));
+	} else {
+	    draw_set_color(make_color_rgb(180, 55, 55));
+	}
+
+	draw_roundrect(
+	    logout_x,
+	    logout_y,
+	    logout_x + logout_w,
+	    logout_y + logout_h,
+	    false
+	);
+
+	draw_set_color(c_white);
+	draw_set_font(fnt_texto);
+
+	draw_text(
+	    logout_x + logout_w / 2,
+	    logout_y + logout_h / 2,
+	    "SAIR"
+	);
 }
 
 // Restaura configurações

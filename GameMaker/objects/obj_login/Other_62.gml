@@ -7,6 +7,7 @@ var status_code = async_load[? "http_status"];
 // 1. RESPOSTA DO INÍCIO DO LOGIN
 // =====================================
 
+
 if (request_id == request_start) {
 
     if (status_code >= 200 && status_code < 300) {
@@ -35,7 +36,6 @@ if (request_id == request_start) {
     }
 }
 
-
 // =====================================
 // 2. RESPOSTA DA CONSULTA DE STATUS
 // =====================================
@@ -43,6 +43,11 @@ if (request_id == request_start) {
 if (request_id == request_status) {
 
     if (status_code >= 200 && status_code < 300) {
+		
+		var result = async_load[? "result"];
+
+		show_debug_message("HTTP STATUS: " + string(status_code));
+		show_debug_message("RESPOSTA DO BACKEND: " + result);
 
         var response = json_parse(
             async_load[? "result"]
@@ -59,6 +64,8 @@ if (request_id == request_status) {
             global.logged_in = true;
             global.player_name = response.player.display_name;
             global.player_id = response.player.id;
+			
+			global.flow_id = flow_id;
 
             login_message = "Login realizado com sucesso!";
 

@@ -68,6 +68,9 @@ app = FastAPI(
 # Em produção, utilizar Redis ou banco compartilhado.
 login_flows = {}
 
+# Sessões autenticadas (flow_id -> access_token).
+# Utilizado para identificar e encerrar sessões no logout.
+active_sessions = {}
 
 # =====================================================
 # MODELOS
@@ -77,12 +80,15 @@ class CompleteLogin(BaseModel):
     flow_id: str
     access_token: str
 
+class LogoutRequest(BaseModel):
+    flow_id: str
+
 
 class CompleteLevel(BaseModel):
     player_id: UUID
     level: int = Field(ge=1)
 
-
+    
 # =====================================================
 # FUNÇÕES AUXILIARES
 # =====================================================
@@ -329,6 +335,8 @@ def complete_login(data: CompleteLogin):
         flow["status"] = "success"
         flow["player"] = player
 
+        active_sessions[data.flow_id] = data.access_token
+
         return {
             "status": "success",
             "message": "Login concluído com sucesso."
@@ -371,6 +379,51 @@ def login_status(flow_id: str):
         "player": flow["player"]
     }
 
+# =====================================================
+# LOGOUT
+# =====================================================
+
+@app.post("/auth/logout")
+def logout(data: LogoutRequest):
+
+    # Localizar sessão do jogador
+    access_token = active_sessions.get(data.flow_id)
+
+    if not access_token:
+        raise HTTPException(
+            status_code=401,
+            detail="Sessão não encontrada ou já encerrada."
+        )
+
+    try:
+        # Encerrar sessão no Supabase
+        auth_client.auth.admin.sign_out(
+            access_token,
+            "local"
+        )
+
+        # Remover sessão armazenada
+        active_sessions.pop(data.flow_id, None)
+
+        # Atualizar status do fluxo
+        flow = login_flows.get(data.flow_id)
+
+        if flow:
+            flow["status"] = "logged_out"
+            flow["player"] = None
+
+        return {
+            "status": "success",
+            "message": "Logout realizado com sucesso."
+        }
+
+    except Exception as error:
+        print("Erro ao realizar logout:", str(error))
+
+        raise HTTPException(
+            status_code=500,
+            detail="Não foi possível encerrar a sessão."
+        )  
 
 # =====================================================
 # PROGRESSO DO JOGADOR (T37 / T38 / T41 / T42)
