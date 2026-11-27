@@ -38,3 +38,7 @@ if (!variable_global_exists("player_id")) {
 if (!variable_global_exists("todas_fases_concluidas")) {
     global.todas_fases_concluidas = false;
 }
+
+// Configuração do logout
+backend_url = "http://127.0.0.1:8000";
+
