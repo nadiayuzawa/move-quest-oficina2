@@ -9,7 +9,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from supabase import create_client, Client
 
@@ -23,11 +22,6 @@ BASE_DIR = Path(__file__).resolve().parent
 BACKEND_DIR = BASE_DIR.parent
 
 TEMPLATES_DIR = BASE_DIR / "templates"
-STATIC_DIR = BASE_DIR / "static"
-
-print("BASE_DIR:", BASE_DIR)
-print("STATIC_DIR:", STATIC_DIR)
-print("CSS EXISTE:", (STATIC_DIR / "css" / "style.css").exists())
 
 load_dotenv(dotenv_path=BACKEND_DIR / ".env")
 
@@ -42,27 +36,6 @@ BACKEND_URL = os.getenv(
 
 FLOW_EXPIRATION_MINUTES = 10
 TOTAL_LEVELS = int(os.getenv("TOTAL_LEVELS", "3"))
-
-# Verificar se as pastas existem
-if not TEMPLATES_DIR.is_dir():
-    raise RuntimeError(
-        f"Pasta templates não encontrada: {TEMPLATES_DIR}"
-    )
-
-if not STATIC_DIR.is_dir():
-    raise RuntimeError(
-        f"Pasta static não encontrada: {STATIC_DIR}"
-    )
-
-
-
-# =====================================================
-# CAMINHO DOS ARQUIVOS HTML
-# =====================================================
-
-BASE_DIR = Path(__file__).resolve().parent
-TEMPLATES_DIR = BASE_DIR / "templates"
-
 
 # =====================================================
 # CLIENTES SUPABASE
@@ -89,12 +62,6 @@ app = FastAPI(
     title="Move Quest Backend API",
     description="Autenticação Google com Supabase",
     version="1.0.0"
-)
-
-app.mount(
-    "/static",
-    StaticFiles(directory=str(STATIC_DIR)),
-    name="static"
 )
 
 # Protótipo local.

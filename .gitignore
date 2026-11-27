@@ -69,3 +69,8 @@ Build
 .env
 .env.*
 !.env.example
+
+# Compiled Python files
+*.py[cod]
+*$py.class
+__pycache__/
