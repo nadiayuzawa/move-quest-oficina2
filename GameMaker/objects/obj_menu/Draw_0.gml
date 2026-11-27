@@ -35,7 +35,7 @@ if (global.logged_in) {
     draw_text(
         btn_x + btn_w / 2,
         btn_y + btn_h / 2,
-        "JOGAR"
+        (progresso_fase_inicial() > 1) ? "CONTINUAR" : "JOGAR"
     );
 	
 	// Botão SAIR

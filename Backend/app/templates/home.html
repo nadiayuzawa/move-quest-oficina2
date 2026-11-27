@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#05051a">
+
+    <title>MOVE QUEST - Backend</title>
+
+    <style>
+        :root {
+            --mq-bg: #05051a;
+            --mq-panel: #10102e;
+            --mq-cyan: #00ffff;
+            --mq-pink: #ff00cc;
+            --mq-red: #ff3030;
+            --mq-green: #00ff99;
+            --mq-orange: #ff9900;
+            --mq-footer: #777799;
+            --mq-text: #e5e5ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: var(--mq-bg);
+            color: var(--mq-text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .home-card {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            padding: 40px 30px;
+            text-align: center;
+            background: var(--mq-panel);
+            border: 1px solid #00ffff55;
+            border-radius: 15px;
+            box-shadow: 0 0 30px #00ffff18;
+        }
+
+        .pacman {
+            position: absolute;
+            top: 18px;
+            left: 20px;
+            width: 24px;
+            height: 24px;
+            background: #ffff00;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #ffff0080;
+        }
+
+        .pacman::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: -1px;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            border-right: 13px solid var(--mq-panel);
+        }
+
+        h1 {
+            margin-bottom: 12px;
+            color: var(--mq-cyan);
+            font-size: 38px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px #00ffff80;
+        }
+
+        .subtitle {
+            margin-bottom: 22px;
+            color: var(--mq-pink);
+            font-size: 13px;
+            letter-spacing: 4px;
+        }
+
+        .divider {
+            width: 70px;
+            height: 3px;
+            margin: 0 auto 25px;
+            background: var(--mq-pink);
+            box-shadow: 0 0 10px var(--mq-pink);
+        }
+
+        p {
+            margin-bottom: 12px;
+            color: #c5c5df;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            margin-top: 20px;
+            padding: 10px 16px;
+            border: 1px solid #00ff9966;
+            border-radius: 8px;
+            color: var(--mq-green);
+            background: #00ff9910;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            background: var(--mq-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--mq-green);
+            animation: pulse 1.5s infinite;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 13px 25px;
+            border: 1px solid var(--mq-cyan);
+            border-radius: 7px;
+            color: var(--mq-cyan);
+            background: #00ffff12;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        a:hover {
+            color: var(--mq-bg);
+            background: var(--mq-cyan);
+            box-shadow: 0 0 20px #00ffff80;
+            transform: translateY(-3px);
+        }
+
+        .ghosts {
+            display: flex;
+            justify-content: center;
+            gap: 13px;
+            margin-top: 32px;
+        }
+
+        .ghost {
+            position: relative;
+            width: 23px;
+            height: 27px;
+            border-radius: 50% 50% 0 0;
+            animation: float 1s infinite alternate;
+        }
+
+        .ghost::after {
+            content: "••";
+            position: absolute;
+            top: 7px;
+            left: 5px;
+            color: white;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        .ghost.red,
+        .red {
+            background: var(--mq-red);
+        }
+
+        .ghost.pink,
+        .pink {
+            background: var(--mq-pink);
+            animation-delay: 0.2s;
+        }
+
+        .ghost.cyan,
+        .cyan {
+            background: var(--mq-cyan);
+            animation-delay: 0.4s;
+        }
+
+        .ghost.orange,
+        .orange {
+            background: var(--mq-orange);
+            animation-delay: 0.6s;
+        }
+
+        .home-card footer {
+            margin-top: 28px;
+            color: var(--mq-footer);
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        @keyframes float {
+            from { transform: translateY(0); }
+            to { transform: translateY(-7px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @media (max-width: 400px) {
+            .home-card {
+                padding: 35px 20px;
+            }
+
+            h1 {
+                font-size: 30px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="home-card">
+
+        <div class="pacman"></div>
+
+        <h1>MOVE QUEST</h1>
+
+        <div class="subtitle">
+            Ready Player One?
+        </div>
+
+        <div class="divider"></div>
+
+        <p>
+            Bem-vindo ao servidor do MOVE QUEST!
+        </p>
+
+        <p>
+            Sua aventura está pronta para começar.
+        </p>
+
+        <div class="status">
+            <span class="status-dot"></span>
+            SERVIDOR ONLINE
+        </div>
+
+        <br>
+
+        <a href="/docs">
+            ACESSAR API
+        </a>
+
+        <div class="ghosts">
+            <div class="ghost red"></div>
+            <div class="ghost pink"></div>
+            <div class="ghost cyan"></div>
+            <div class="ghost orange"></div>
+        </div>
+
+        <footer>
+            MOVE QUEST © 2026
+        </footer>
+
+    </main>
+</body>
+</html>

@@ -125,6 +125,12 @@ function terminar_fase(_resultado, _motivo)
     obj_game.playing   = false;
     obj_game.timer_resultado = game_get_speed(gamespeed_fps) * 2;
 
+    // T42 - Vitória: registra a fase como concluída e salva o progresso
+    if (_resultado == "vitoria")
+    {
+        progresso_salvar_fase(global.fase);
+    }
+
     if (_resultado == "derrota" && instance_exists(obj_player))
     {
         obj_player.moving = false;

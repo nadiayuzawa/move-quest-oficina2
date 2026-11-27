@@ -10,6 +10,9 @@ login_state = LoginState.IDLE;
 
 backend_url = "http://127.0.0.1:8000";
 
+// Compartilha o endereço com o restante do jogo (scr_progresso)
+global.backend_url = backend_url;
+
 flow_id = "";
 login_token = "";
 player_name = "";

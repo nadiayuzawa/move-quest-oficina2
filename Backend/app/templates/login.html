@@ -1,0 +1,475 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#05051a">
+
+    <title>MOVE QUEST - Login</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --mq-bg: #05051a;
+            --mq-panel: #10102e;
+            --mq-cyan: #00ffff;
+            --mq-pink: #ff00cc;
+            --mq-red: #ff3030;
+            --mq-green: #00ff99;
+            --mq-orange: #ff9900;
+            --mq-footer: #777799;
+            --mq-text: #e5e5ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: var(--mq-bg);
+            color: var(--mq-text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .login-card {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            padding: 40px 30px;
+            text-align: center;
+            background: var(--mq-panel);
+            border: 1px solid #00ffff55;
+            border-radius: 15px;
+            box-shadow: 0 0 30px #00ffff18;
+        }
+
+        .pacman {
+            position: absolute;
+            top: 18px;
+            left: 20px;
+            width: 24px;
+            height: 24px;
+            background: #ffff00;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #ffff0080;
+        }
+
+        .pacman::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: -1px;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            border-right: 13px solid var(--mq-panel);
+        }
+
+        h1 {
+            margin-bottom: 12px;
+            color: var(--mq-cyan);
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px #00ffff80;
+        }
+
+        .subtitle {
+            margin-bottom: 22px;
+            color: var(--mq-pink);
+            font-size: 13px;
+            letter-spacing: 4px;
+        }
+
+        .divider {
+            width: 70px;
+            height: 3px;
+            margin: 0 auto 25px;
+            background: var(--mq-pink);
+            box-shadow: 0 0 10px var(--mq-pink);
+        }
+
+        .description {
+            margin-bottom: 25px;
+            color: #c5c5df;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        #google-login {
+            width: 100%;
+            min-height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            border: 1px solid var(--mq-cyan);
+            border-radius: 8px;
+            color: var(--mq-cyan);
+            background: #00ffff12;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #google-login:hover:not(:disabled) {
+            color: var(--mq-bg);
+            background: var(--mq-cyan);
+            box-shadow: 0 0 20px #00ffff80;
+            transform: translateY(-2px);
+        }
+
+        #google-login:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .google-icon {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .login-card .status {
+            min-height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 22px;
+            padding: 12px;
+            border: 1px solid #172cff66;
+            border-radius: 8px;
+            color: var(--mq-cyan);
+            background: #172cff18;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .login-card .status.error {
+            color: #ff7777;
+            border-color: var(--mq-red);
+            background: #ff303015;
+        }
+
+        .login-card .status.success {
+            color: var(--mq-green);
+            border-color: var(--mq-green);
+            background: #00ff9915;
+        }
+
+        .ghosts {
+            display: flex;
+            justify-content: center;
+            gap: 13px;
+            margin-top: 32px;
+        }
+
+        .ghost {
+            position: relative;
+            width: 23px;
+            height: 27px;
+            border-radius: 50% 50% 0 0;
+            animation: float 1s infinite alternate;
+        }
+
+        .ghost::after {
+            content: "••";
+            position: absolute;
+            top: 7px;
+            left: 5px;
+            color: #ffffff;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        .ghost.red,
+        .red {
+            background: var(--mq-red);
+        }
+
+        .ghost.pink,
+        .pink {
+            background: var(--mq-pink);
+            animation-delay: 0.2s;
+        }
+
+        .ghost.cyan,
+        .cyan {
+            background: var(--mq-cyan);
+            animation-delay: 0.4s;
+        }
+
+        .ghost.orange,
+        .orange {
+            background: var(--mq-orange);
+            animation-delay: 0.6s;
+        }
+
+        .login-card footer {
+            margin-top: 28px;
+            color: var(--mq-footer);
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            margin-right: 8px;
+            border: 2px solid #09092555;
+            border-top-color: var(--mq-panel);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes float {
+            from { transform: translateY(0); }
+            to { transform: translateY(-7px); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 400px) {
+            .login-card {
+                padding: 32px 20px;
+            }
+
+            h1 {
+                font-size: 29px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="login-card">
+
+        <div class="pacman"></div>
+
+        <h1>MOVE QUEST</h1>
+
+        <div class="subtitle">
+            PLAYER LOGIN
+        </div>
+
+        <div class="divider"></div>
+
+        <p class="description">
+            Entre na sua conta para salvar seu progresso
+            e continuar sua aventura!
+        </p>
+
+        <button id="google-login" type="button">
+
+            <svg class="google-icon" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.6c3.9-3.6 6.1-8.9 6.1-15z"/>
+                <path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.6-5.1c-1.8 1.2-4.1 2-6.9 2-5.3 0-9.8-3.6-11.4-8.4H5.8v5.3A20 20 0 0 0 24 44z"/>
+                <path fill="#FBBC05" d="M12.6 27.6a12 12 0 0 1 0-7.2v-5.3H5.8a20 20 0 0 0 0 17.8z"/>
+                <path fill="#EA4335" d="M24 11.9c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 5.8 29.5 4 24 4A20 20 0 0 0 5.8 15.1l6.8 5.3c1.6-4.9 6.1-8.5 11.4-8.5z"/>
+            </svg>
+
+            CONTINUAR COM GOOGLE
+
+        </button>
+
+        <div id="login-status" class="status" role="status" aria-live="polite">
+            Aguardando início do login...
+        </div>
+
+        <div class="ghosts">
+            <div class="ghost red"></div>
+            <div class="ghost pink"></div>
+            <div class="ghost cyan"></div>
+            <div class="ghost orange"></div>
+        </div>
+
+        <footer>
+            MOVE QUEST © 2026
+        </footer>
+
+    </main>
+
+    <script>
+        const SUPABASE_URL = __SUPABASE_URL__;
+        const SUPABASE_KEY = __SUPABASE_KEY__;
+        const FLOW_ID = __FLOW_ID__;
+        const BACKEND_URL = __BACKEND_URL__;
+        const CALLBACK_URL = __CALLBACK__;
+
+        const button = document.getElementById("google-login");
+        const statusBox = document.getElementById("login-status");
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY,
+            {
+                auth: {
+                    flowType: "pkce",
+                    detectSessionInUrl: false,
+                    persistSession: true,
+                    autoRefreshToken: true
+                }
+            }
+        );
+
+        function showStatus(message, type = "") {
+            statusBox.className = "status" + (type ? " " + type : "");
+            statusBox.textContent = message;
+        }
+
+        function setLoading(loading, message) {
+            button.disabled = loading;
+
+            if (loading) {
+                button.replaceChildren();
+
+                const spinner = document.createElement("span");
+                spinner.className = "spinner";
+
+                button.append(
+                    spinner,
+                    document.createTextNode(message)
+                );
+            } else {
+                button.innerHTML = `
+                    <svg class="google-icon" viewBox="0 0 48 48" aria-hidden="true">
+                        <path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.6c3.9-3.6 6.1-8.9 6.1-15z"/>
+                        <path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.6-5.1c-1.8 1.2-4.1 2-6.9 2-5.3 0-9.8-3.6-11.4-8.4H5.8v5.3A20 20 0 0 0 24 44z"/>
+                        <path fill="#FBBC05" d="M12.6 27.6a12 12 0 0 1 0-7.2v-5.3H5.8a20 20 0 0 0 0 17.8z"/>
+                        <path fill="#EA4335" d="M24 11.9c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 5.8 29.5 4 24 4A20 20 0 0 0 5.8 15.1l6.8 5.3c1.6-4.9 6.1-8.5 11.4-8.5z"/>
+                    </svg>
+                    CONTINUAR COM GOOGLE
+                `;
+            }
+        }
+
+        async function startGoogleLogin() {
+            setLoading(true, "CONECTANDO...");
+
+            showStatus("Redirecionando para o Google...");
+
+            try {
+                const { error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: "google",
+                    options: {
+                        redirectTo: CALLBACK_URL + "?flow_id=" + encodeURIComponent(FLOW_ID),
+                        skipBrowserRedirect: false
+                    }
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+            } catch (error) {
+                console.error("Erro no login:", error);
+
+                setLoading(false);
+
+                showStatus(
+                    "Não foi possível iniciar o login. Tente novamente.",
+                    "error"
+                );
+            }
+        }
+
+        async function initialize() {
+            button.addEventListener("click", startGoogleLogin);
+
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get("code");
+
+            if (!code) {
+                showStatus("Pronto para iniciar sua aventura!");
+                return;
+            }
+
+            setLoading(true, "VALIDANDO...");
+
+            showStatus("Validando sua conta Google...");
+
+            try {
+                const { data, error } =
+                    await supabaseClient.auth.exchangeCodeForSession(code);
+
+                if (error) {
+                    throw error;
+                }
+
+                const accessToken = data.session?.access_token;
+
+                if (!accessToken) {
+                    throw new Error("Token de acesso não encontrado.");
+                }
+
+                const response = await fetch(
+                    BACKEND_URL + "/auth/complete",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            flow_id: FLOW_ID,
+                            access_token: accessToken
+                        })
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.detail || "Falha ao concluir o login."
+                    );
+                }
+
+                showStatus(
+                    "Login realizado com sucesso! Pode voltar ao jogo.",
+                    "success"
+                );
+
+                setLoading(false);
+
+            } catch (error) {
+                console.error("Erro ao finalizar login:", error);
+
+                setLoading(false);
+
+                showStatus(
+                    error.message || "Erro ao validar sua conta.",
+                    "error"
+                );
+            }
+        }
+
+        initialize();
+    </script>
+
+</body>
+</html>
