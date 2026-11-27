@@ -1,35 +1,44 @@
+
 if (global.logged_in) {
 
-    // Hover do botão JOGAR
-    hover = point_in_rectangle(
-        mouse_x,
-        mouse_y,
-        btn_x,
-        btn_y,
-        btn_x + btn_w,
-        btn_y + btn_h
+    // Hover NOVO JOGO
+    novo_hover = point_in_rectangle(
+        mouse_x, mouse_y,
+        btn_novo_x, btn_novo_y,
+        btn_novo_x + btn_novo_w,
+        btn_novo_y + btn_novo_h
     );
 
-    // Hover do botão SAIR
+    // Hover CONTINUAR
+    cont_hover = point_in_rectangle(
+        mouse_x, mouse_y,
+        btn_cont_x, btn_cont_y,
+        btn_cont_x + btn_cont_w,
+        btn_cont_y + btn_cont_h
+    );
+
+    // Hover SAIR
     logout_hover = point_in_rectangle(
-        mouse_x,
-        mouse_y,
-        logout_x,
-        logout_y,
+        mouse_x, mouse_y,
+        logout_x, logout_y,
         logout_x + logout_w,
         logout_y + logout_h
     );
 
-    // Clique em JOGAR
+    // NOVO JOGO: começa na fase 1
+    if (novo_hover && mouse_check_button_pressed(mb_left)) {
+        ir_para_fase(1);
+    }
+
+    // CONTINUAR: recupera a última fase salva
     if (
-        (hover && mouse_check_button_pressed(mb_left)) ||
+        (cont_hover && mouse_check_button_pressed(mb_left)) ||
         keyboard_check_pressed(vk_enter)
     ) {
-        // T41 - Continua da última fase do jogador (fase 1 se for novo)
         ir_para_fase(progresso_fase_inicial());
     }
 
-    // Clique em SAIR
+    // SAIR
     if (
         logout_hover &&
         mouse_check_button_pressed(mb_left) &&
@@ -63,7 +72,8 @@ if (global.logged_in) {
 
 } else {
 
-    hover = false;
+    novo_hover = false;
+    cont_hover = false;
     logout_hover = false;
 
 }
