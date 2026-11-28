@@ -3,6 +3,7 @@
 // Criado por progresso_garantir_controlador() (scr_progresso).
 
 req_carregar = -1;               // id da requisição de leitura em andamento
+req_reset = -1;					 // id da requisição de reset
 req_salvar = ds_map_create();    // id da requisição de gravação -> fase enviada
 pendentes = [];                  // fases que falharam e serão reenviadas
 
@@ -38,6 +39,36 @@ enviar_fase = function(_fase)
     else falha_salvar(_fase);
 };
 
+/// POST /progress/reset/{player_id}
+resetar_progresso = function()
+{
+    var headers = ds_map_create();
+    ds_map_add(headers, "Content-Type", "application/json");
+
+    req_reset = http_request(
+        global.backend_url + "/progress/reset/" + global.player_id,
+        "POST",
+        headers,
+        ""
+    );
+
+    ds_map_destroy(headers);
+
+    if (req_reset < 0)
+	{
+	    req_reset = -1;
+
+	    show_debug_message("Progresso: não foi possível solicitar o reset.");
+
+	    if (instance_exists(obj_menu))
+	    {
+	        with (obj_menu) {
+	            novo_pendente = false;
+	        }
+	    }
+	}
+};
+
 falha_carregar = function()
 {
     if (tentativas_carregar < max_tentativas)
@@ -47,6 +78,8 @@ falha_carregar = function()
     }
     else
     {
+        global.progresso_falhou = true;
+
         show_debug_message("Progresso: não foi possível carregar do backend.");
     }
 };

@@ -27,6 +27,43 @@ if (id_req == req_carregar)
     }
 }
 
+// ---------- T40 - Reset do progresso ----------
+
+else if (id_req == req_reset)
+{
+    req_reset = -1;
+
+    if (ok)
+    {
+        progresso_aplicar(json_parse(async_load[? "result"]));
+
+        show_debug_message("Progresso resetado com sucesso.");
+
+        if (instance_exists(obj_menu))
+        {
+            with (obj_menu) {
+                novo_pendente = false;
+            }
+        }
+
+        // Começa um novo jogo na fase 1
+        ir_para_fase(1);
+    }
+    else
+    {
+        show_debug_message(
+            "Erro ao resetar progresso: " + string(http)
+        );
+
+        if (instance_exists(obj_menu))
+        {
+            with (obj_menu) {
+                novo_pendente = false;
+            }
+        }
+    }
+}
+
 // ---------- T42 - Gravação da fase concluída ----------
 else if (ds_map_exists(req_salvar, id_req))
 {

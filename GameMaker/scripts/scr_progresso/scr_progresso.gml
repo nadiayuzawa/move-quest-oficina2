@@ -16,6 +16,7 @@ function progresso_resetar()
     global.progresso_ultima_fase = 1;
     global.progresso_concluidas  = [];
     global.progresso_carregado   = false;
+	global.progresso_falhou = false;
 }
 
 /// T38 - A fase _n já foi concluída?
@@ -45,6 +46,7 @@ function progresso_aplicar(_dados)
 {
     global.progresso_ultima_fase = _dados.last_level;
     global.progresso_concluidas  = _dados.completed_levels;
+	global.progresso_falhou = false;
     global.progresso_carregado   = true;
 }
 

@@ -20,6 +20,9 @@ logout_y = btn_novo_y + btn_novo_h + 20;
 
 logout_hover = false;
 
+novo_pendente = false;
+continuar_pendente = false;
+
 // Estado inicial do login
 if (!variable_global_exists("logged_in")) {
     global.logged_in = false;
@@ -33,3 +36,6 @@ backend_url = "http://127.0.0.1:8000";
 logout_pending = false;
 logout_request = -1;
 logout_hover = false;
+
+novo_pendente = false;
+continuar_pendente = false;

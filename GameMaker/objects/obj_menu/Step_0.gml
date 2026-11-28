@@ -26,17 +26,50 @@ if (global.logged_in) {
     );
 
     // NOVO JOGO: começa na fase 1
-    if (novo_hover && mouse_check_button_pressed(mb_left)) {
-        ir_para_fase(1);
-    }
+    // NOVO JOGO: reseta o progresso antes de iniciar
+	// NOVO JOGO: reseta o progresso antes de iniciar
+	if (novo_hover && mouse_check_button_pressed(mb_left))
+	{
+	    if (!novo_pendente)
+	    {
+	        progresso_garantir_controlador();
 
-    // CONTINUAR: recupera a última fase salva
-    if (
-        (cont_hover && mouse_check_button_pressed(mb_left)) ||
-        keyboard_check_pressed(vk_enter)
-    ) {
-        ir_para_fase(progresso_fase_inicial());
-    }
+	        with (obj_progresso)
+	        {
+	            resetar_progresso();
+	        }
+
+	        novo_pendente = true;
+	    }
+	}
+
+    // CONTINUAR: aguarda o carregamento do progresso
+	if (
+	    cont_hover &&
+	    mouse_check_button_pressed(mb_left) &&
+	    !continuar_pendente
+	)
+	{
+	    continuar_pendente = true;
+	}
+
+// Verifica se o progresso foi carregado
+	if (continuar_pendente)
+	{
+	    if (global.progresso_carregado)
+	    {
+	        continuar_pendente = false;
+	        ir_para_fase(progresso_fase_inicial());
+	    }
+	    else if (global.progresso_falhou)
+	    {
+	        continuar_pendente = false;
+
+	        show_message(
+	            "Não foi possível carregar seu progresso. Verifique sua conexão e tente novamente."
+	        );
+	    }
+	}
 
     // SAIR
     if (

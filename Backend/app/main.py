@@ -625,6 +625,46 @@ def complete_level(data: CompleteLevel):
             "Não foi possível salvar o progresso."
         )
 
+# =====================================================
+# RESETA FASE
+# =====================================================
+
+@app.post("/progress/reset/{player_id}")
+def reset_progress(player_id: UUID):
+    """
+    Reinicia o progresso do jogador.
+    """
+
+    player_id = str(player_id)
+
+    ensure_player_exists(player_id)
+
+    try:
+        # Remove as fases concluídas
+        admin_client.table("level_progress") \
+            .delete() \
+            .eq("player_id", player_id) \
+            .execute()
+
+        # Reinicia a última fase para 1
+        admin_client.table("player_progress").upsert(
+            {
+                "player_id": player_id,
+                "last_level": 1,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            },
+            on_conflict="player_id"
+        ).execute()
+
+        return load_progress(player_id)
+
+    except Exception as error:
+        print("Erro ao reiniciar progresso:", str(error))
+
+        raise HTTPException(
+            500,
+            "Não foi possível reiniciar o progresso."
+        )
 
 # =====================================================
 # EXECUTAR SERVIDOR
